@@ -7,8 +7,22 @@ const User_schema=new mongoose.Schema({
     },
     Password:{
         type:String,
-        required:true,
-        unique:true
+         validate:{
+            validator:function(value){
+                if(this.isGoogleuser){
+                    return true
+                }else{
+                    return value && value.length >0
+                }
+                
+            }
+             
+         }
+        
+    },
+    isGoogleuser:{
+        type:Boolean,
+        default:false
     },
     Email:{
         type:String,
@@ -21,6 +35,20 @@ const User_schema=new mongoose.Schema({
     },
     Image:{
         type:Object
+    },
+    Loginmethod:{
+        type:String,
+        enum:["local","google"],
+        default:"local"
+    },
+    Googleid:{
+        type:String,
+        sparse:true,
+        unique:true
+    },
+    Googlephoto:{
+        type:String,
+        sparse:true
     }
 })
 const User=mongoose.model("User",User_schema)

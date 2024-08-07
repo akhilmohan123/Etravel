@@ -4,6 +4,7 @@ const fs = require("fs");
 const User = require("../models/User");
 require("dotenv").config()
 const jwt=require("jsonwebtoken");
+const { jwt_verify } = require("./jwt");
 module.exports = {
   sign_up: async (req, res) => {
     console.log("Sign-up called");
@@ -70,9 +71,7 @@ module.exports = {
         if(result){
          exist_user.Username=exist_email.Username;
          exist_user.Email=exist_email.Email;
-         exist_user.Password=exist_email.Password;
-         exist_user.Image=exist_email.Image;
-         exist_user.Date=exist_email.Date;
+       
           const token=jwt.sign({data:exist_user},process.env.JWT_SECRET_KEY,{ expiresIn: '1800s',algorithm: 'HS256',  })
           res.status(200).json({data:token})
         }else{
@@ -87,7 +86,16 @@ module.exports = {
        return res.status(400).json({data:false,message:"Network Error"})
    }
   },
-  get_user_data:async(req,res)=>{
-    console.log("called")
+   get_user_data : async (req, res) => {
+    try {
+      // Use await to handle the promise returned by jwt_verify
+      const user = await jwt_verify(req);
+      
+      // Send a successful response with user data
+      res.status(200).json(user);
+    } catch (error) {
+      // Handle and send errors with proper status and message
+      res.status(400).json({ success: false, message: error.message });
+    }
   }
-};
+}
